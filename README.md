@@ -27,7 +27,7 @@ Network-wide ad blocker and parental controls for Raspberry Pi.
 
 ## Quick Install
 
-1. Install Pi-hole:curl -sSL https://install.pi-hole.net | bash
+1. Install Pi-hole: curl -sSL https://install.pi-hole.net | bash
 
 2. Clone this repo:
 git clone https://github.com/AuraNet-AU/auranet-dashboard.git ~/auranet_dashboard
