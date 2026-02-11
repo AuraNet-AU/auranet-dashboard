@@ -1,0 +1,64 @@
+{
+  "enabled_categories": [
+    "adult",
+    "gambling",
+    "malware",
+    "tracking"
+  ],
+  "protection_mode": "family",
+  "bedtime_enabled": false,
+  "bedtime_start": "21:00",
+  "bedtime_end": "07:00",
+  "devices": {
+    "0c:6a:c4:82:bc:33": {
+      "name": "Liam's iPhone",
+      "icon": "phone"
+    },
+    "a8:a1:59:64:a7:6a": {
+      "name": "Liam's PC",
+      "icon": "pc-display"
+    }
+  },
+  "last_health_check": {
+    "timestamp": "2026-02-11T10:14:06.375502",
+    "overall_status": "healthy",
+    "checks": {
+      "pihole_service": {
+        "name": "Pi-hole Service",
+        "status": "ok",
+        "message": "Running normally"
+      },
+      "dns_resolution": {
+        "name": "DNS Resolution",
+        "status": "ok",
+        "message": "Working correctly"
+      },
+      "blocklist_database": {
+        "name": "Blocklist Database",
+        "status": "ok",
+        "message": "4,006,153 domains in blocklist"
+      },
+      "internet_connection": {
+        "name": "Internet Connection",
+        "status": "ok",
+        "message": "Connected"
+      },
+      "blocklist_sources": {
+        "name": "Blocklist Sources",
+        "status": "ok",
+        "message": "Sources accessible"
+      },
+      "disk_space": {
+        "name": "Disk Space",
+        "status": "ok",
+        "message": "27% used"
+      },
+      "memory": {
+        "name": "Memory Usage",
+        "status": "ok",
+        "message": "22% used"
+      }
+    },
+    "issues": []
+  }
+}

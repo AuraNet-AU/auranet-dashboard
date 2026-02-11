@@ -1,0 +1,747 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+      :root {
+        --aura-primary: #6366f1;
+        --aura-primary-dark: #4f46e5;
+        --aura-success: #22c55e;
+        --aura-success-dark: #16a34a;
+        --aura-danger: #ef4444;
+        --aura-warning: #f59e0b;
+        --aura-info: #0ea5e9;
+      }
+      
+      * { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+      
+      body {
+        background: linear-gradient(180deg, #f0f4ff 0%, #fafafa 100%);
+        min-height: 100vh;
+      }
+      
+      .main-header {
+        background: linear-gradient(135deg, var(--aura-primary) 0%, var(--aura-primary-dark) 100%);
+        color: white;
+        padding: 1.25rem 0;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+      }
+      
+      .logo-icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+      }
+      
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.875rem;
+      }
+      
+      .status-protected {
+        background: rgba(34, 197, 94, 0.2);
+        color: #166534;
+        border: 2px solid rgba(34, 197, 94, 0.3);
+      }
+      
+      .status-unprotected {
+        background: rgba(239, 68, 68, 0.2);
+        color: #991b1b;
+        border: 2px solid rgba(239, 68, 68, 0.3);
+        animation: pulse-warning 2s infinite;
+      }
+      
+      @keyframes pulse-warning {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+      }
+      
+      .nav-link-custom {
+        color: rgba(255,255,255,0.8);
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        transition: all 0.2s;
+      }
+      
+      .nav-link-custom:hover, .nav-link-custom.active {
+        color: white;
+        background: rgba(255,255,255,0.15);
+      }
+      
+      .aura-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        margin-bottom: 1.25rem;
+        overflow: hidden;
+        border: 1px solid rgba(0,0,0,0.05);
+      }
+      
+      .aura-card-header {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+      }
+      
+      .aura-card-header h2 {
+        font-size: 1.125rem;
+        font-weight: 700;
+        margin: 0;
+        color: #1e293b;
+      }
+      
+      .aura-card-header .header-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 0.875rem;
+        font-size: 1.125rem;
+      }
+      
+      .aura-card-body { padding: 1.25rem; }
+      
+      .stat-card {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+        height: 100%;
+      }
+      
+      .stat-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--aura-primary);
+        line-height: 1.2;
+      }
+      
+      .stat-label {
+        color: #64748b;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+      }
+      
+      .mode-card {
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1.25rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        height: 100%;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+      }
+      
+      .mode-card:hover {
+        border-color: var(--aura-primary);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.15);
+        color: inherit;
+      }
+      
+      .mode-card.active {
+        border-color: var(--aura-success);
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, rgba(34, 197, 94, 0.1) 100%);
+      }
+      
+      .mode-card.active .mode-icon { background: var(--aura-success); }
+      
+      .mode-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--aura-primary) 0%, var(--aura-primary-dark) 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin: 0 auto 0.875rem;
+      }
+      
+      .mode-card h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 0.375rem;
+        color: #1e293b;
+      }
+      
+      .mode-card p {
+        font-size: 0.8125rem;
+        color: #64748b;
+        margin: 0;
+        line-height: 1.4;
+      }
+      
+      .category-card {
+        background: #f8fafc;
+        border-radius: 10px;
+        padding: 0.875rem 1rem;
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.625rem;
+        transition: all 0.2s ease;
+      }
+      
+      .category-card:hover { background: #f1f5f9; }
+      
+      .category-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.125rem;
+        margin-right: 0.875rem;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      }
+      
+      .category-info { flex: 1; }
+      
+      .category-info h4 {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        margin: 0;
+        color: #1e293b;
+      }
+      
+      .category-info p {
+        font-size: 0.75rem;
+        color: #64748b;
+        margin: 0;
+      }
+      
+      .toggle-switch {
+        position: relative;
+        width: 50px;
+        height: 28px;
+        display: block;
+      }
+      
+      .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      
+      .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #cbd5e1;
+        transition: 0.3s;
+        border-radius: 28px;
+      }
+      
+      .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 22px;
+        width: 22px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: 0.3s;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      
+      .toggle-switch input:checked + .toggle-slider {
+        background: linear-gradient(135deg, var(--aura-success) 0%, var(--aura-success-dark) 100%);
+      }
+      
+      .toggle-switch input:checked + .toggle-slider:before {
+        transform: translateX(22px);
+      }
+      
+      .btn-aura {
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.9375rem;
+        border: none;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 48px;
+      }
+      
+      .btn-aura:hover { transform: translateY(-2px); }
+      
+      .btn-aura-primary {
+        background: linear-gradient(135deg, var(--aura-primary) 0%, var(--aura-primary-dark) 100%);
+        color: white;
+      }
+      
+      .btn-aura-primary:hover {
+        box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
+        color: white;
+      }
+      
+      .btn-aura-success {
+        background: linear-gradient(135deg, var(--aura-success) 0%, var(--aura-success-dark) 100%);
+        color: white;
+      }
+      
+      .btn-aura-success:hover {
+        box-shadow: 0 6px 16px rgba(34, 197, 94, 0.35);
+        color: white;
+      }
+      
+      .btn-aura-danger {
+        background: linear-gradient(135deg, var(--aura-danger) 0%, #dc2626 100%);
+        color: white;
+      }
+      
+      .btn-aura-danger:hover {
+        box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
+        color: white;
+      }
+      
+      .btn-aura-outline {
+        background: white;
+        color: var(--aura-primary);
+        border: 2px solid var(--aura-primary);
+      }
+      
+      .btn-aura-outline:hover {
+        background: var(--aura-primary);
+        color: white;
+      }
+      
+      .aura-input {
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-size: 0.9375rem;
+        transition: all 0.2s ease;
+        width: 100%;
+      }
+      
+      .aura-input:focus {
+        outline: none;
+        border-color: var(--aura-primary);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      }
+      
+      .aura-select {
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-size: 0.9375rem;
+        transition: all 0.2s ease;
+        background-color: white;
+        min-height: 48px;
+      }
+      
+      .aura-select:focus {
+        outline: none;
+        border-color: var(--aura-primary);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      }
+      
+      .warning-banner {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border-left: 4px solid var(--aura-warning);
+        border-radius: 10px;
+        padding: 0.875rem 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: flex-start;
+      }
+      
+      .warning-banner i {
+        color: var(--aura-warning);
+        font-size: 1.25rem;
+        margin-right: 0.75rem;
+        flex-shrink: 0;
+      }
+      
+      .warning-banner p {
+        margin: 0;
+        color: #78350f;
+        font-size: 0.875rem;
+        line-height: 1.5;
+      }
+      
+      .help-box {
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        border-radius: 10px;
+        padding: 0.875rem 1rem;
+        margin-top: 1rem;
+      }
+      
+      .help-toggle {
+        display: flex;
+        align-items: center;
+        color: var(--aura-info);
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        font-size: 0.875rem;
+      }
+      
+      .help-toggle:hover { color: #0284c7; }
+      
+      .alert {
+        border: none;
+        border-radius: 10px;
+        padding: 0.875rem 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        font-size: 0.9375rem;
+      }
+      
+      .alert i {
+        font-size: 1.125rem;
+        margin-right: 0.625rem;
+      }
+      
+      .main-footer {
+        text-align: center;
+        padding: 1.5rem 0;
+        color: #64748b;
+        font-size: 0.875rem;
+      }
+      
+      .main-footer a {
+        color: var(--aura-primary);
+        text-decoration: none;
+      }
+      
+      .main-footer a:hover { text-decoration: underline; }
+      
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      
+      @media (max-width: 768px) {
+        .mode-card { margin-bottom: 0.75rem; }
+        .stat-card { margin-bottom: 0.75rem; }
+      }
+    </style>
+  </head>
+  <body>
+    
+    <!-- HEADER -->
+    <header class="main-header">
+      <div class="container">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <div class="d-flex align-items-center">
+            <div class="logo-icon me-2">
+              <i class="bi bi-shield-check"></i>
+            </div>
+            <div>
+              <h1 class="h5 mb-0 fw-bold">AuraNet</h1>
+              <p class="mb-0 opacity-75" style="font-size: 0.8125rem;">Home Network Protection</p>
+            </div>
+          </div>
+          
+          <div class="d-flex align-items-center gap-3">
+            <nav class="d-none d-md-flex gap-1">
+              <a href="{{ url_for('index') }}" class="nav-link-custom active">
+                <i class="bi bi-house-door me-1"></i>Home
+              </a>
+              <a href="{{ url_for('devices') }}" class="nav-link-custom">
+                <i class="bi bi-laptop me-1"></i>Devices
+              </a>
+              <a href="{{ url_for('health') }}" class="nav-link-custom">
+                <i class="bi bi-heart-pulse me-1"></i>Health
+              </a>
+              <a href="{{ url_for('help_page') }}" class="nav-link-custom">
+                <i class="bi bi-question-circle me-1"></i>Help
+              </a>
+            </nav>
+            
+            {% if is_protected %}
+              <span class="status-pill status-protected">
+                <i class="bi bi-check-circle-fill me-1"></i>Protected
+              </span>
+            {% else %}
+              <span class="status-pill status-unprotected">
+                <i class="bi bi-exclamation-circle-fill me-1"></i>Unprotected
+              </span>
+            {% endif %}
+          </div>
+        </div>
+        
+        <!-- Mobile Navigation -->
+        <nav class="d-flex d-md-none gap-2 mt-3 justify-content-center flex-wrap">
+          <a href="{{ url_for('index') }}" class="nav-link-custom active">Home</a>
+          <a href="{{ url_for('devices') }}" class="nav-link-custom">Devices</a>
+          <a href="{{ url_for('health') }}" class="nav-link-custom">Health</a>
+          <a href="{{ url_for('help_page') }}" class="nav-link-custom">Help</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="container pb-4" style="max-width: 900px;">
+      
+      <!-- FLASH MESSAGES -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+              <i class="bi {% if category == 'success' %}bi-check-circle-fill{% elif category == 'danger' %}bi-x-circle-fill{% elif category == 'warning' %}bi-exclamation-triangle-fill{% else %}bi-info-circle-fill{% endif %}"></i>
+              <span>{{ message }}</span>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <!-- STATS ROW -->
+      <div class="row g-2 mb-3">
+        <div class="col-6 col-md-3">
+          <div class="stat-card">
+            <div class="stat-number">{{ stats.blocked_today }}</div>
+            <div class="stat-label">Threats Blocked</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-card">
+            <div class="stat-number">{{ stats.percent_blocked }}%</div>
+            <div class="stat-label">Traffic Filtered</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-card">
+            <div class="stat-number">{{ stats.domains_blocked }}</div>
+            <div class="stat-label">Sites in Blocklist</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-card">
+            <div class="stat-number" style="color: var(--aura-success);">{{ settings.enabled_categories|length }}</div>
+            <div class="stat-label">Active Filters</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROTECTION MODES -->
+      <div class="aura-card">
+        <div class="aura-card-header">
+          <div class="header-icon" style="background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%); color: #7c3aed;">
+            <i class="bi bi-sliders"></i>
+          </div>
+          <h2>Protection Level</h2>
+        </div>
+        <div class="aura-card-body">
+          <p class="text-muted mb-3" style="font-size: 0.875rem;">Choose a preset that matches your needs. Click to apply.</p>
+          
+          <div class="row g-2">
+            {% for mode_id, mode in modes.items() %}
+            <div class="col-md-4">
+              <a href="{{ url_for('set_mode', mode_name=mode_id) }}" class="mode-card {% if settings.protection_mode == mode_id %}active{% endif %}" onclick="showUpdating()">
+                <div class="mode-icon">
+                  <i class="bi {{ mode.icon }}"></i>
+                </div>
+                <h3>{{ mode.name }}</h3>
+                <p>{{ mode.description }}</p>
+                {% if settings.protection_mode == mode_id %}
+                  <span class="badge bg-success mt-2"><i class="bi bi-check2 me-1"></i>Active</span>
+                {% endif %}
+              </a>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTENT FILTERS -->
+      <div class="aura-card">
+        <div class="aura-card-header">
+          <div class="header-icon" style="background: linear-gradient(135deg, #bbf7d0 0%, #86efac 100%); color: #16a34a;">
+            <i class="bi bi-filter-circle"></i>
+          </div>
+          <h2>Content Filters</h2>
+        </div>
+        <div class="aura-card-body">
+          <p class="text-muted mb-3" style="font-size: 0.875rem;">Toggle individual categories on or off. Changes take about 1-2 minutes to apply.</p>
+          
+          {% for cat_id, cat in categories.items() %}
+          <a href="{{ url_for('toggle_category', category_name=cat_id) }}" class="category-card text-decoration-none" onclick="showUpdating()">
+            <div class="category-icon" style="color: {{ cat.color }};">
+              <i class="bi {{ cat.icon }}"></i>
+            </div>
+            <div class="category-info">
+              <h4>{{ cat.name }}</h4>
+              <p>{{ cat.description }}</p>
+            </div>
+            <div class="toggle-switch">
+              <input type="checkbox" {% if cat_id in settings.enabled_categories %}checked{% endif %} disabled>
+              <span class="toggle-slider"></span>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- PAUSE PROTECTION -->
+      <div class="aura-card">
+        <div class="aura-card-header">
+          <div class="header-icon" style="background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%); color: #dc2626;">
+            <i class="bi bi-pause-circle"></i>
+          </div>
+          <h2>Pause Protection</h2>
+        </div>
+        <div class="aura-card-body">
+          <div class="warning-banner">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <p><strong>Caution:</strong> Pausing protection exposes all devices to ads, trackers, and dangerous websites. Only use when necessary.</p>
+          </div>
+          
+          <div class="row g-2">
+            <div class="col-12 col-md-7">
+              <form method="POST" action="{{ url_for('pause_protection') }}" id="pauseForm">
+                <div class="d-flex gap-2">
+                  <select name="duration" class="aura-select" style="flex: 0 0 130px;">
+                    <option value="5m">5 minutes</option>
+                    <option value="15m">15 minutes</option>
+                    <option value="30m">30 minutes</option>
+                    <option value="1h">1 hour</option>
+                    <option value="2h">2 hours</option>
+                  </select>
+                  <button type="button" class="btn-aura btn-aura-danger flex-grow-1" onclick="confirmPause()">
+                    <i class="bi bi-pause-circle me-2"></i>Pause
+                  </button>
+                </div>
+              </form>
+            </div>
+            <div class="col-12 col-md-5">
+              <a href="{{ url_for('enable_protection') }}" class="btn-aura btn-aura-success w-100">
+                <i class="bi bi-play-circle me-2"></i>Enable
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WEBSITE MANAGEMENT -->
+      <div class="aura-card">
+        <div class="aura-card-header">
+          <div class="header-icon" style="background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%); color: #2563eb;">
+            <i class="bi bi-globe"></i>
+          </div>
+          <h2>Allow or Block a Website</h2>
+        </div>
+        <div class="aura-card-body">
+          <form method="POST" action="{{ url_for('manage_domain') }}">
+            <div class="mb-3">
+              <div class="input-group">
+                <span class="input-group-text" style="border-radius: 10px 0 0 10px; border: 2px solid #e2e8f0; border-right: none; background: #f8fafc;">
+                  <i class="bi bi-link-45deg"></i>
+                </span>
+                <input type="text" name="domain" class="aura-input" style="border-radius: 0 10px 10px 0; border-left: none;" placeholder="example.com" required>
+              </div>
+              <small class="text-muted mt-1 d-block">Enter the website address without "http://" or "www."</small>
+            </div>
+            <div class="d-flex gap-2 justify-content-end">
+              <button type="submit" name="action" value="deny" class="btn-aura btn-aura-outline">
+                <i class="bi bi-x-circle me-1"></i>Block
+              </button>
+              <button type="submit" name="action" value="allow" class="btn-aura btn-aura-primary">
+                <i class="bi bi-check-circle me-1"></i>Allow
+              </button>
+            </div>
+          </form>
+          
+          <div class="help-box">
+            <a class="help-toggle" data-bs-toggle="collapse" href="#helpSection" role="button" aria-expanded="false">
+              <i class="bi bi-question-circle me-2"></i>
+              Changes not working? Click for help
+              <i class="bi bi-chevron-down ms-auto"></i>
+            </a>
+            <div class="collapse mt-2" id="helpSection">
+              <p class="small mb-2">Changes can take a few minutes. If still not working:</p>
+              <ul class="small mb-0 ps-3">
+                <li>Close and reopen your browser</li>
+                <li>Restart the device</li>
+                <li>Wait 5 minutes and try again</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="main-footer">
+      <p class="mb-1"><a href="http://auranet-hub.local/admin/" target="_blank"><i class="bi bi-speedometer2 me-1"></i>Advanced Settings</a></p>
+      <p class="small mb-0">AuraNet Home Protection</p>
+    </footer>
+
+    <!-- UPDATING MODAL -->
+    <div class="modal fade" id="updatingModal" data-bs-backdrop="static" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content" style="border-radius: 16px; border: none;">
+          <div class="modal-body text-center p-4">
+            <div class="mb-3">
+              <i class="bi bi-arrow-repeat" style="font-size: 2.5rem; color: var(--aura-primary); animation: spin 1s linear infinite;"></i>
+            </div>
+            <h5 class="fw-bold mb-2">Updating Protection</h5>
+            <p class="text-muted mb-0" style="font-size: 0.875rem;">This may take 1-2 minutes. Please wait...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      function confirmPause() {
+        const duration = document.querySelector('select[name="duration"]');
+        const durationText = duration.options[duration.selectedIndex].text;
+        
+        const confirmed = confirm(
+          "⚠️ Are you sure you want to pause protection?\n\n" +
+          "Duration: " + durationText + "\n\n" +
+          "While paused, ALL devices on your network will be exposed to:\n\n" +
+          "• Advertisements and tracking\n" +
+          "• Malware and phishing websites\n" +
+          "• Adult content (if enabled)\n" +
+          "• Other blocked categories\n\n" +
+          "Click OK to pause, or Cancel to stay protected."
+        );
+        
+        if (confirmed) {
+          document.getElementById('pauseForm').submit();
+        }
+      }
+      
+      function showUpdating() {
+        const modal = new bootstrap.Modal(document.getElementById('updatingModal'));
+        modal.show();
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,19 @@
+[0;1;31m×[0m nginx.service - A high performance web server and a reverse proxy server
+     Loaded: loaded (]8;;file://auranet-hub/usr/lib/systemd/system/nginx.service\/usr/lib/systemd/system/nginx.service]8;;\; [0;1;32menabled[0m; preset: [0;1;32menabled[0m)
+     Active: [0;1;31mfailed[0m (Result: exit-code) since Mon 2026-02-09 17:22:45 AEST; 35s ago
+ Invocation: a9e1ad294b334cc49e2191ba4b860799
+       Docs: ]8;;man:nginx(8)\man:nginx(8)]8;;\
+    Process: 8096 ExecStartPre=/usr/sbin/nginx -t -q -g daemon on; master_process on; (code=exited, status=0/SUCCESS)
+    Process: 8098 ExecStart=/usr/sbin/nginx -g daemon on; master_process on; [0;1;31m(code=exited, status=1/FAILURE)[0m
+        CPU: 94ms
+
+Feb 09 17:22:42 auranet-hub systemd[1]: Starting nginx.service - A high performance web server and a reverse proxy server...
+Feb 09 17:22:42 auranet-hub nginx[8098]: nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Address already in use)
+Feb 09 17:22:43 auranet-hub nginx[8098]: nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Address already in use)
+Feb 09 17:22:43 auranet-hub nginx[8098]: nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Address already in use)
+Feb 09 17:22:44 auranet-hub nginx[8098]: nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Address already in use)
+Feb 09 17:22:44 auranet-hub nginx[8098]: nginx: [emerg] bind() to 0.0.0.0:80 failed (98: Address already in use)
+Feb 09 17:22:45 auranet-hub nginx[8098]: nginx: [emerg] still could not bind()
+Feb 09 17:22:45 auranet-hub systemd[1]: [0;1;39m[0;1;31m[0;1;39mnginx.service: Control process exited, code=exited, status=1/FAILURE[0m
+Feb 09 17:22:45 auranet-hub systemd[1]: [0;1;38:5:185m[0;1;39m[0;1;38:5:185mnginx.service: Failed with result 'exit-code'.[0m
+Feb 09 17:22:45 auranet-hub systemd[1]: [0;1;31m[0;1;39m[0;1;31mFailed to start nginx.service - A high performance web server and a reverse proxy server.[0m
