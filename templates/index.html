@@ -748,7 +748,7 @@
               </form>
             </div>
             <div class="col-12 col-md-5">
-              <a href="{{ url_for('enable_protection') }}" class="btn-aura btn-aura-success w-100">
+              <a href="{{ url_for('enable_protection') }}" class="btn-aura btn-aura-success w-100" style="text-decoration: none;">
                 <i class="bi bi-play-circle me-2"></i>Enable
               </a>
             </div>
@@ -772,16 +772,16 @@
             <div class="mb-3">
               <div class="position-relative">
                 <i class="bi bi-link-45deg position-absolute" style="left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 1.125rem;"></i>
-                <input type="text" name="domain" class="aura-input" style="padding-left: 42px;" placeholder="example.com" required>
+                <input type="text" name="domain" class="aura-input" style="padding-left: 42px;" placeholder="e.g. facebook.com or youtube.com" required>
               </div>
-              <small class="text-muted mt-1 d-block">Enter the website address without "http://" or "www."</small>
+              <small class="text-muted mt-1 d-block">Just type the website name — no need for "http://" or "www."</small>
             </div>
             <div class="d-flex gap-2 justify-content-end">
-              <button type="submit" name="action" value="deny" class="btn-aura btn-aura-outline">
-                <i class="bi bi-x-circle me-1"></i>Block
+              <button type="submit" name="action" value="deny" class="btn-aura" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;">
+                <i class="bi bi-x-circle me-1"></i>Block This Site
               </button>
-              <button type="submit" name="action" value="allow" class="btn-aura btn-aura-primary">
-                <i class="bi bi-check-circle me-1"></i>Allow
+              <button type="submit" name="action" value="allow" class="btn-aura" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: white;">
+                <i class="bi bi-check-circle me-1"></i>Allow This Site
               </button>
             </div>
           </form>
