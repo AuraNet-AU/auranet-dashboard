@@ -1,0 +1,9 @@
+{
+  "enabled_categories": [
+    "malware",
+    "tracking"
+  ],
+  "protection_mode": "standard",
+  "devices": {},
+  "last_health_check": null
+}

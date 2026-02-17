@@ -1,0 +1,21 @@
+# User-specific settings
+settings.json
+*.pyc
+__pycache__/
+
+# Virtual environment
+venv/
+env/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
