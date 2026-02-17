@@ -37,7 +37,7 @@ CATEGORY_LISTS = {
         'color': '#2563eb',
         'urls': [
             'https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/social-only/hosts',
-            'https://blocklistproject.github.io/Lists/alt-version/social-nl.txt',
+            'https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/social-onlydomains.txt',
         ]
     },
     'gambling': {
@@ -56,7 +56,7 @@ CATEGORY_LISTS = {
         'icon': 'bi-controller',
         'color': '#7c3aed',
         'urls': [
-            'https://blocklistproject.github.io/Lists/alt-version/gaming-nl.txt',
+            'https://raw.githubusercontent.com/nicholaswilde/blocklists/main/gaming/gaming.txt',
         ]
     },
     'malware': {
