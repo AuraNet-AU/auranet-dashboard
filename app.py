@@ -56,7 +56,7 @@ CATEGORY_LISTS = {
         'icon': 'bi-controller',
         'color': '#7c3aed',
         'urls': [
-            'https://raw.githubusercontent.com/nicholaswilde/blocklists/main/gaming/gaming.txt',
+            'https://raw.githubusercontent.com/DandelionSprout/adfilt/master/GameConsoleAdblockList.txt',
         ]
     },
     'malware': {
