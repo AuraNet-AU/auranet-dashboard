@@ -4,6 +4,9 @@ import json
 import os
 import sqlite3
 import secrets
+import socket
+import fcntl
+import struct
 import urllib.request
 import urllib.error
 import threading
@@ -491,6 +494,27 @@ def get_network_devices():
         print(f"Error getting devices: {e}")
     return devices
 
+def get_pi_ip():
+    """Return the Pi's LAN IP: eth0 first, then wlan0, then hostname fallback."""
+    def _iface_ip(ifname):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            try:
+                return socket.inet_ntoa(fcntl.ioctl(
+                    s.fileno(),
+                    0x8915,  # SIOCGIFADDR
+                    struct.pack('256s', ifname[:15].encode())
+                )[20:24])
+            finally:
+                s.close()
+        except Exception:
+            return None
+    return (
+        _iface_ip('eth0') or
+        _iface_ip('wlan0') or
+        socket.gethostbyname(socket.gethostname())
+    )
+
 # ============== HEALTH CHECK ==============
 
 # Cache: (timestamp, result) — refresh every 5 minutes
@@ -936,6 +960,7 @@ def setup():
         settings=settings,
         modes=PROTECTION_MODES,
         devices=devices,
+        pi_ip=get_pi_ip(),
     )
 
 @app.route('/setup/check-internet')
