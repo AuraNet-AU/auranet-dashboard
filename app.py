@@ -22,6 +22,15 @@ PIHOLE_FTL_DB = '/etc/pihole/pihole-FTL.db'
 
 # ============== REDUNDANT BLOCKLISTS ==============
 CATEGORY_LISTS = {
+    'vpn': {
+        'name': 'VPN & Proxy Services',
+        'description': 'Blocks VPN apps and services (enforces social media ban)',
+        'icon': 'bi-shield-lock',
+        'color': '#ef4444',
+        'urls': [
+    	    'file:///home/auranet/vpn_blocklist.txt',
+       ]
+    },
     'adult': {
         'name': 'Adult Content',
         'description': 'Blocks pornography and adult websites',
@@ -96,17 +105,17 @@ CATEGORY_LISTS = {
 PROTECTION_MODES = {
     'kids': {
         'name': 'Kids Mode',
-        'description': 'Maximum protection - blocks adult content, social media, gambling, and gaming',
+        'description': 'Maximum protection - blocks VPNs, social media, adult content, and gaming',
         'icon': 'bi-emoji-smile',
         'color': '#22c55e',
-        'categories': ['adult', 'social', 'gambling', 'malware', 'tracking', 'gaming']
+        'categories': ['vpn', 'adult', 'social', 'gambling', 'malware', 'tracking', 'gaming']
     },
     'family': {
         'name': 'Family Mode',
-        'description': 'Balanced protection - blocks adult content, gambling, and dangerous sites',
+        'description': 'Balanced protection - blocks VPNs, adult content, gambling, and dangerous sites',
         'icon': 'bi-house-heart',
         'color': '#6366f1',
-        'categories': ['adult', 'gambling', 'malware', 'tracking']
+        'categories': ['vpn', 'adult', 'gambling', 'malware', 'tracking']
     },
     'standard': {
         'name': 'Standard Mode',
@@ -366,18 +375,18 @@ def get_stats():
         print(f"Error getting stats: {e}")
     return stats
 
-def get_last_blocked_domains(limit=5):
-    """Get the most recently blocked domains from Pi-hole FTL database"""
+def get_last_blocked_domain():
+    """Get the most recently blocked domain from Pi-hole FTL database"""
     try:
         success, result = run_sqlite_query(
             PIHOLE_FTL_DB,
-            f"SELECT DISTINCT d.domain FROM query_storage q JOIN domain_by_id d ON q.domain = d.id WHERE q.status IN (2,3,4,5,10,11) ORDER BY q.timestamp DESC LIMIT {limit};"
+            "SELECT domain FROM query_storage WHERE status IN (2,3,4,5,10,11) ORDER BY timestamp DESC LIMIT 1;"
         )
         if success and result.strip():
-            return result.strip().split('\n')
+            return result.strip()
     except Exception:
         pass
-    return []
+    return None
 
 def get_network_devices():
     """Get list of devices on the network from Pi-hole FTL database"""
@@ -629,7 +638,7 @@ def index():
     settings = load_settings()
     is_protected = get_pihole_status()
     stats = get_stats()
-    last_blocked = get_last_blocked_domains()
+    last_blocked = get_last_blocked_domain()
     gravity_status = get_gravity_status()
 
     return render_template('index.html',
