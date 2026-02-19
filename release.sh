@@ -35,6 +35,16 @@ echo "✅ Updated version.txt to $NEW_VERSION"
 
 # Update CHANGELOG.md
 TODAY=$(date +%Y-%m-%d)
+
+# Update version.json (used for OTA update checks)
+python3 -c "
+import json, sys
+data = {'version': sys.argv[1], 'released': sys.argv[2], 'changelog': sys.argv[3]}
+with open('version.json', 'w') as f:
+    json.dump(data, f, indent=2)
+    f.write('\n')
+" "$NEW_VERSION" "$TODAY" "$CHANGELOG_ENTRY"
+echo "✅ Updated version.json"
 sed -i "3i\\
 ## [$NEW_VERSION] - $TODAY\\
 $CHANGELOG_ENTRY\\
@@ -42,7 +52,7 @@ $CHANGELOG_ENTRY\\
 echo "✅ Updated CHANGELOG.md"
 
 # Git operations
-git add version.txt CHANGELOG.md
+git add version.txt CHANGELOG.md version.json
 git add -A  # Add any other changes
 git commit -m "Release v$NEW_VERSION
 

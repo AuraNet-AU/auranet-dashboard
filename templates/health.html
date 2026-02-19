@@ -1,474 +1,202 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ title }}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <style>
-      :root {
-        --aura-primary: #6366f1;
-        --aura-primary-dark: #4f46e5;
-        --aura-success: #22c55e;
-        --aura-danger: #ef4444;
-        --aura-warning: #f59e0b;
-      }
-      
-      * { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
-      
-      body {
-        background: linear-gradient(180deg, #f0f4ff 0%, #fafafa 100%);
-        min-height: 100vh;
-      }
-      
-      .main-header {
-        background: linear-gradient(135deg, var(--aura-primary) 0%, var(--aura-primary-dark) 100%);
-        color: white;
-        padding: 1.25rem 0;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
-      }
-      
-      .logo-icon {
-        width: 50px;
-        height: 50px;
-        background: rgba(255,255,255,0.2);
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-      }
-      
-      .status-pill {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.5rem 1rem;
-        border-radius: 50px;
-        font-weight: 600;
-        font-size: 0.875rem;
-      }
-      
-    
-.status-protected {
-  background: #22c55e;
-  color: white;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.4);
-}
+{% extends "base.html" %}
 
-.status-unprotected {
-  background: #ef4444;
-  color: white;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
-}
-      
-      .nav-link-custom {
-        color: rgba(255,255,255,0.8);
-        text-decoration: none;
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        transition: all 0.2s;
-      }
-      
-      .nav-link-custom:hover, .nav-link-custom.active {
-        color: white;
-        background: rgba(255,255,255,0.15);
-      }
-      
-      .aura-card {
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        margin-bottom: 1.25rem;
-        overflow: hidden;
-        border: 1px solid rgba(0,0,0,0.05);
-      }
-      
-      .aura-card-header {
-        padding: 1rem 1.25rem;
-        border-bottom: 1px solid #f1f5f9;
-        display: flex;
-        align-items: center;
-      }
-      
-      .aura-card-header h2 {
-        font-size: 1.125rem;
-        font-weight: 700;
-        margin: 0;
-        color: #1e293b;
-      }
-      
-      .aura-card-header .header-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 0.875rem;
-        font-size: 1.125rem;
-      }
-      
-      .aura-card-body { padding: 1.25rem; }
-      
-      .status-banner {
-        border-radius: 12px;
-        padding: 1.5rem;
-        text-align: center;
-        margin-bottom: 1.5rem;
-      }
-      
-      .status-banner.healthy {
-        background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-        border: 2px solid #86efac;
-      }
-      
-      .status-banner.warning {
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-        border: 2px solid #fcd34d;
-      }
-      
-      .status-banner.error {
-        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-        border: 2px solid #fca5a5;
-      }
-      
-      .status-icon {
-        width: 64px;
-        height: 64px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2rem;
-        margin: 0 auto 1rem;
-      }
-      
-      .status-banner.healthy .status-icon {
-        background: #22c55e;
-        color: white;
-      }
-      
-      .status-banner.warning .status-icon {
-        background: #f59e0b;
-        color: white;
-      }
-      
-      .status-banner.error .status-icon {
-        background: #ef4444;
-        color: white;
-      }
-      
-      .check-item {
-        display: flex;
-        align-items: center;
-        padding: 1rem;
-        background: #f8fafc;
-        border-radius: 10px;
-        margin-bottom: 0.75rem;
-      }
-      
-      .check-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 1rem;
-        font-size: 1.125rem;
-      }
-      
-      .check-icon.ok {
-        background: #dcfce7;
-        color: #16a34a;
-      }
-      
-      .check-icon.warning {
-        background: #fef3c7;
-        color: #d97706;
-      }
-      
-      .check-icon.error {
-        background: #fee2e2;
-        color: #dc2626;
-      }
-      
-      .check-info { flex: 1; }
-      
-      .check-name {
-        font-weight: 600;
-        color: #1e293b;
-        font-size: 0.9375rem;
-      }
-      
-      .check-message {
-        font-size: 0.8125rem;
-        color: #64748b;
-      }
-      
-      .troubleshoot-box {
-        background: #fffbeb;
-        border: 1px solid #fde68a;
-        border-radius: 10px;
-        padding: 1rem;
-        margin-top: 0.75rem;
-      }
-      
-      .troubleshoot-box h5 {
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: #92400e;
-        margin-bottom: 0.5rem;
-      }
-      
-      .troubleshoot-box ol {
-        margin: 0;
-        padding-left: 1.25rem;
-        font-size: 0.8125rem;
-        color: #78350f;
-      }
-      
-      .troubleshoot-box li {
-        margin-bottom: 0.25rem;
-      }
-      
-      .btn-repair {
-        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        color: white;
-        border: none;
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        font-size: 0.8125rem;
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-      }
-      
-      .btn-repair:hover {
-        color: white;
-        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-      }
-      
-      .alert {
-        border: none;
-        border-radius: 10px;
-      }
-      
-      .main-footer {
-        text-align: center;
-        padding: 1.5rem 0;
-        color: #64748b;
-        font-size: 0.875rem;
-      }
-      
-      .main-footer a {
-        color: var(--aura-primary);
-        text-decoration: none;
-      }
-    </style>
-  </head>
-  <body>
-    
-    <!-- HEADER -->
-    <header class="main-header">
-      <div class="container">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-          <div class="d-flex align-items-center">
-            <div class="logo-icon me-2">
-              <i class="bi bi-shield-check"></i>
-            </div>
-            <div>
-              <h1 class="h5 mb-0 fw-bold">AuraNet</h1>
-              <p class="mb-0 opacity-75" style="font-size: 0.8125rem;">Home Network Protection</p>
-            </div>
-          </div>
-          
-          <div class="d-flex align-items-center gap-3">
-            <nav class="d-none d-md-flex gap-1">
-              <a href="{{ url_for('index') }}" class="nav-link-custom">
-                <i class="bi bi-house-door me-1"></i>Home
-              </a>
-              <a href="{{ url_for('devices') }}" class="nav-link-custom">
-                <i class="bi bi-laptop me-1"></i>Devices
-              </a>
-              <a href="{{ url_for('health') }}" class="nav-link-custom active">
-                <i class="bi bi-heart-pulse me-1"></i>Health
-              </a>
-              <a href="{{ url_for('help_page') }}" class="nav-link-custom">
-                <i class="bi bi-question-circle me-1"></i>Help
-              </a>
-            </nav>
-            
-            {% if is_protected %}
-              <span class="status-pill status-protected">
-                <i class="bi bi-check-circle-fill me-1"></i>Protected
-              </span>
-            {% else %}
-              <span class="status-pill status-unprotected">
-                <i class="bi bi-exclamation-circle-fill me-1"></i>Unprotected
-              </span>
-            {% endif %}
-          </div>
-        </div>
-        
-        <!-- Mobile Navigation -->
-        <nav class="d-flex d-md-none gap-2 mt-3 justify-content-center flex-wrap">
-          <a href="{{ url_for('index') }}" class="nav-link-custom">Home</a>
-          <a href="{{ url_for('devices') }}" class="nav-link-custom">Devices</a>
-          <a href="{{ url_for('health') }}" class="nav-link-custom active">Health</a>
-          <a href="{{ url_for('help_page') }}" class="nav-link-custom">Help</a>
-        </nav>
+{% block container_width %}800px{% endblock %}
+{% block content_width %}800px{% endblock %}
+
+{% block extra_styles %}
+  .status-banner {
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .status-banner.healthy { background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); border: 2px solid #86efac; }
+  .status-banner.warning { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 2px solid #fcd34d; }
+  .status-banner.error   { background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border: 2px solid #fca5a5; }
+
+  .status-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin: 0 auto 1rem;
+  }
+
+  .status-banner.healthy .status-icon { background: #22c55e; color: white; }
+  .status-banner.warning .status-icon { background: #f59e0b; color: white; }
+  .status-banner.error   .status-icon { background: #ef4444; color: white; }
+
+  .check-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 10px;
+    margin-bottom: 0.75rem;
+  }
+
+  .check-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-size: 1.125rem;
+    flex-shrink: 0;
+  }
+
+  .check-icon.ok      { background: #dcfce7; color: #16a34a; }
+  .check-icon.warning { background: #fef3c7; color: #d97706; }
+  .check-icon.error   { background: #fee2e2; color: #dc2626; }
+
+  .check-info { flex: 1; }
+  .check-name    { font-weight: 600; color: #1e293b; font-size: 0.9375rem; }
+  .check-message { font-size: 0.8125rem; color: #64748b; }
+
+  .troubleshoot-box {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-top: 0.75rem;
+  }
+
+  .troubleshoot-box h5 { font-size: 0.875rem; font-weight: 600; color: #92400e; margin-bottom: 0.5rem; }
+  .troubleshoot-box ol { margin: 0; padding-left: 1.25rem; font-size: 0.8125rem; color: #78350f; }
+  .troubleshoot-box li { margin-bottom: 0.25rem; }
+
+  .btn-repair {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .btn-repair:hover { color: white; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
+{% endblock %}
+
+{% set active_page = 'health' %}
+
+{% block content %}
+
+  <!-- OVERALL STATUS -->
+  <div class="status-banner {{ health.overall_status }}">
+    <div class="status-icon">
+      {% if health.overall_status == 'healthy' %}
+        <i class="bi bi-check-lg"></i>
+      {% elif health.overall_status == 'warning' %}
+        <i class="bi bi-exclamation-lg"></i>
+      {% else %}
+        <i class="bi bi-x-lg"></i>
+      {% endif %}
+    </div>
+    <h2 class="h4 fw-bold mb-2">
+      {% if health.overall_status == 'healthy' %}Everything is Working Great!
+      {% elif health.overall_status == 'warning' %}Minor Issues Detected
+      {% else %}Attention Needed{% endif %}
+    </h2>
+    <p class="mb-0 text-muted">
+      {% if health.overall_status == 'healthy' %}Your AuraNet is running perfectly and protecting your network.
+      {% elif health.overall_status == 'warning' %}Your protection is working, but there are some minor issues.
+      {% else %}There's a problem that needs your attention. See details below.{% endif %}
+    </p>
+  </div>
+
+  <!-- SYSTEM CHECKS -->
+  <div class="aura-card">
+    <div class="aura-card-header">
+      <div class="header-icon" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); color: #2563eb;">
+        <i class="bi bi-clipboard-check"></i>
       </div>
-    </header>
+      <h2>System Checks</h2>
+    </div>
+    <div class="aura-card-body">
 
-    <div class="container pb-4" style="max-width: 800px;">
-      
-      <!-- FLASH MESSAGES -->
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-          {% for category, message in messages %}
-            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-              <i class="bi {% if category == 'success' %}bi-check-circle-fill{% elif category == 'danger' %}bi-x-circle-fill{% elif category == 'warning' %}bi-exclamation-triangle-fill{% else %}bi-info-circle-fill{% endif %} me-2"></i>
-              {{ message }}
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-          {% endfor %}
-        {% endif %}
-      {% endwith %}
-
-      <!-- OVERALL STATUS -->
-      <div class="status-banner {{ health.overall_status }}">
-        <div class="status-icon">
-          {% if health.overall_status == 'healthy' %}
-            <i class="bi bi-check-lg"></i>
-          {% elif health.overall_status == 'warning' %}
-            <i class="bi bi-exclamation-lg"></i>
-          {% else %}
-            <i class="bi bi-x-lg"></i>
-          {% endif %}
+      {% for check_id, check in health.checks.items() %}
+      <div class="check-item">
+        <div class="check-icon {{ check.status }}">
+          {% if check.status == 'ok' %}<i class="bi bi-check-lg"></i>
+          {% elif check.status == 'warning' %}<i class="bi bi-exclamation-lg"></i>
+          {% else %}<i class="bi bi-x-lg"></i>{% endif %}
         </div>
-        <h2 class="h4 fw-bold mb-2">
-          {% if health.overall_status == 'healthy' %}
-            Everything is Working Great!
-          {% elif health.overall_status == 'warning' %}
-            Minor Issues Detected
-          {% else %}
-            Attention Needed
-          {% endif %}
-        </h2>
-        <p class="mb-0 text-muted">
-          {% if health.overall_status == 'healthy' %}
-            Your AuraNet is running perfectly and protecting your network.
-          {% elif health.overall_status == 'warning' %}
-            Your protection is working, but there are some minor issues.
-          {% else %}
-            There's a problem that needs your attention. See details below.
-          {% endif %}
-        </p>
-      </div>
-
-      <!-- SYSTEM CHECKS -->
-      <div class="aura-card">
-        <div class="aura-card-header">
-          <div class="header-icon" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); color: #2563eb;">
-            <i class="bi bi-clipboard-check"></i>
-          </div>
-          <h2>System Checks</h2>
+        <div class="check-info">
+          <div class="check-name">{{ check.name }}</div>
+          <div class="check-message">{{ check.message }}</div>
         </div>
-        <div class="aura-card-body">
-          
-          {% for check_id, check in health.checks.items() %}
-          <div class="check-item">
-            <div class="check-icon {{ check.status }}">
-              {% if check.status == 'ok' %}
-                <i class="bi bi-check-lg"></i>
-              {% elif check.status == 'warning' %}
-                <i class="bi bi-exclamation-lg"></i>
-              {% else %}
-                <i class="bi bi-x-lg"></i>
-              {% endif %}
-            </div>
-            <div class="check-info">
-              <div class="check-name">{{ check.name }}</div>
-              <div class="check-message">{{ check.message }}</div>
-            </div>
-            {% if check.status != 'ok' and check_id in ['pihole_service', 'blocklist_database', 'dns_resolution'] %}
-              <a href="{{ url_for('repair_issue', issue=check_id) }}" class="btn-repair">
-                <i class="bi bi-wrench me-1"></i>Repair
-              </a>
-            {% endif %}
-          </div>
-          
-          {% if check.status != 'ok' and check_id in troubleshooting %}
-          <div class="troubleshoot-box">
-            <h5><i class="bi bi-lightbulb me-1"></i>How to Fix</h5>
-            <ol>
-              {% for step in troubleshooting[check_id] %}
-                <li>{{ step }}</li>
-              {% endfor %}
-            </ol>
-          </div>
-          {% endif %}
-          {% endfor %}
-          
-        </div>
-      </div>
-
-      <!-- QUICK ACTIONS -->
-      <div class="aura-card">
-        <div class="aura-card-header">
-          <div class="header-icon" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); color: #d97706;">
-            <i class="bi bi-tools"></i>
-          </div>
-          <h2>Quick Fixes</h2>
-        </div>
-        <div class="aura-card-body">
-          <p class="text-muted mb-3" style="font-size: 0.875rem;">Try these if you're experiencing issues:</p>
-          
-          <div class="d-flex flex-wrap gap-2">
-            <a href="{{ url_for('repair_issue', issue='dns_resolution') }}" class="btn btn-outline-primary">
-              <i class="bi bi-arrow-clockwise me-1"></i>Restart DNS
-            </a>
-            <a href="{{ url_for('repair_issue', issue='blocklist_database') }}" class="btn btn-outline-primary">
-              <i class="bi bi-database me-1"></i>Rebuild Blocklists
-            </a>
-            <a href="{{ url_for('repair_issue', issue='pihole_service') }}" class="btn btn-outline-primary">
-              <i class="bi bi-power me-1"></i>Restart Protection
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <!-- CONTACT SUPPORT -->
-      <div class="aura-card">
-        <div class="aura-card-header">
-          <div class="header-icon" style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); color: #4f46e5;">
-            <i class="bi bi-headset"></i>
-          </div>
-          <h2>Need More Help?</h2>
-        </div>
-        <div class="aura-card-body text-center">
-          <p class="text-muted mb-3">If the automatic fixes don't work, we're here to help.</p>
-          <a href="mailto:support@auranet.com" class="btn btn-primary">
-            <i class="bi bi-envelope me-2"></i>Contact Support
+        {% if check.status != 'ok' and check_id in ['pihole_service', 'blocklist_database', 'dns_resolution'] %}
+          <a href="{{ url_for('repair_issue', issue=check_id) }}" class="btn-repair">
+            <i class="bi bi-wrench me-1"></i>Repair
           </a>
-          <p class="small text-muted mt-3 mb-0">
-            When contacting support, please include a screenshot of this page.
-          </p>
-        </div>
+        {% endif %}
       </div>
+
+      {% if check.status != 'ok' and check_id in troubleshooting %}
+      <div class="troubleshoot-box">
+        <h5><i class="bi bi-lightbulb me-1"></i>How to Fix</h5>
+        <ol>
+          {% for step in troubleshooting[check_id] %}
+            <li>{{ step }}</li>
+          {% endfor %}
+        </ol>
+      </div>
+      {% endif %}
+      {% endfor %}
 
     </div>
+  </div>
 
-    <footer class="main-footer">
-      <p class="small mb-0">AuraNet Home Protection</p>
-    </footer>
+  <!-- QUICK FIXES -->
+  <div class="aura-card">
+    <div class="aura-card-header">
+      <div class="header-icon" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); color: #d97706;">
+        <i class="bi bi-tools"></i>
+      </div>
+      <h2>Quick Fixes</h2>
+    </div>
+    <div class="aura-card-body">
+      <p class="text-muted mb-3" style="font-size: 0.875rem;">Try these if you're experiencing issues:</p>
+      <div class="d-flex flex-wrap gap-2">
+        <a href="{{ url_for('repair_issue', issue='dns_resolution') }}" class="btn btn-outline-primary">
+          <i class="bi bi-arrow-clockwise me-1"></i>Restart DNS
+        </a>
+        <a href="{{ url_for('repair_issue', issue='blocklist_database') }}" class="btn btn-outline-primary">
+          <i class="bi bi-database me-1"></i>Rebuild Blocklists
+        </a>
+        <a href="{{ url_for('repair_issue', issue='pihole_service') }}" class="btn btn-outline-primary">
+          <i class="bi bi-power me-1"></i>Restart Protection
+        </a>
+      </div>
+    </div>
+  </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  </body>
-</html>
+  <!-- CONTACT SUPPORT -->
+  <div class="aura-card">
+    <div class="aura-card-header">
+      <div class="header-icon" style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); color: #4f46e5;">
+        <i class="bi bi-headset"></i>
+      </div>
+      <h2>Need More Help?</h2>
+    </div>
+    <div class="aura-card-body text-center">
+      <p class="text-muted mb-3">If the automatic fixes don't work, we're here to help.</p>
+      <a href="mailto:support@getauranet.com.au" class="btn btn-primary">
+        <i class="bi bi-envelope me-2"></i>Contact Support
+      </a>
+      <p class="small text-muted mt-3 mb-0">When contacting support, please include a screenshot of this page.</p>
+    </div>
+  </div>
+
+{% endblock %}
