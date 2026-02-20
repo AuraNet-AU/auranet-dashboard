@@ -1377,4 +1377,4 @@ def settings_update_status_route():
     return jsonify(get_update_status() or {'status': 'idle'})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(host='0.0.0.0', port=80, debug=True)
