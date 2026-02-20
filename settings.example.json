@@ -4,6 +4,18 @@
     "tracking"
   ],
   "protection_mode": "standard",
-  "devices": {},
-  "last_health_check": null
+  "devices": {
+    "aa:bb:cc:dd:ee:ff": {
+      "name": "Dad's Laptop",
+      "icon": "laptop",
+      "mode": null
+    }
+  },
+  "last_health_check": null,
+  "bedtime_enabled": false,
+  "bedtime_start": "21:00",
+  "bedtime_end": "07:00",
+  "setup_completed": false,
+  "setup_product": null,
+  "timezone": "Australia/Brisbane"
 }

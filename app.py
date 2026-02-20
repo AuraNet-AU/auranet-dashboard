@@ -52,6 +52,10 @@ def _get_or_create_secret_key():
 app = Flask(__name__)
 app.config['SECRET_KEY'] = _get_or_create_secret_key()
 
+@app.template_filter('short_num')
+def short_num_filter(n):
+    return format_stat_short(int(n))
+
 # ============== SETUP GUARD ==============
 
 SETUP_EXEMPT = {
@@ -61,6 +65,9 @@ SETUP_EXEMPT = {
     'gravity_status_route', 'gravity_dismiss', 'static',
 }
 
+# Flag to run group sync once on first request
+_groups_synced = False
+
 @app.before_request
 def require_setup():
     if request.endpoint in SETUP_EXEMPT:
@@ -68,20 +75,18 @@ def require_setup():
     s = load_settings()
     if not s.get('setup_completed', False):
         return redirect(url_for('setup'))
+    # Bootstrap per-device group structure on first real request
+    global _groups_synced
+    if not _groups_synced:
+        try:
+            sync_adlist_groups(s.get('protection_mode', 'standard'))
+            _groups_synced = True
+        except Exception as e:
+            print(f"Group sync error (will retry): {e}")
 
 # ============== BLOCKLISTS ==============
 
 CATEGORY_LISTS = {
-    'vpn': {
-        'name': 'VPN & Proxy Services',
-        'description': 'Blocks VPN apps and services (enforces social media ban)',
-        'icon': 'bi-shield-lock',
-        'color': '#ef4444',
-        'urls': [
-            'https://raw.githubusercontent.com/AuraNet-AU/blocklists/main/vpn-blocklist.txt',
-            'file:///home/auranet/vpn_blocklist.txt',
-        ]
-    },
     'adult': {
         'name': 'Adult Content',
         'description': 'Blocks pornography and adult websites',
@@ -96,12 +101,13 @@ CATEGORY_LISTS = {
     },
     'social': {
         'name': 'Social Media',
-        'description': 'Blocks Facebook, Instagram, TikTok, Twitter, Snapchat',
+        'description': 'Blocks Facebook, Instagram, TikTok, Snapchat and their mobile app infrastructure',
         'icon': 'bi-chat-dots',
         'color': '#2563eb',
         'urls': [
             'https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/social-only/hosts',
             'https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/social-onlydomains.txt',
+            'https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/social.txt',
         ]
     },
     'gambling': {
@@ -148,7 +154,6 @@ CATEGORY_LISTS = {
             'https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/light-onlydomains.txt',
             'https://blocklistproject.github.io/Lists/alt-version/tracking-nl.txt',
             'https://blocklistproject.github.io/Lists/alt-version/ads-nl.txt',
-            'https://small.oisd.nl/domainswild',
         ]
     }
 }
@@ -156,21 +161,21 @@ CATEGORY_LISTS = {
 PROTECTION_MODES = {
     'kids': {
         'name': 'Kids Mode',
-        'description': 'Maximum protection - blocks VPNs, social media, adult content, and gaming',
+        'description': 'Safest setting for children. Blocks social media, adult content, and gaming.',
         'icon': 'bi-emoji-smile',
         'color': '#22c55e',
-        'categories': ['vpn', 'adult', 'social', 'gambling', 'malware', 'tracking', 'gaming']
+        'categories': ['adult', 'social', 'gambling', 'malware', 'tracking', 'gaming']
     },
     'family': {
         'name': 'Family Mode',
-        'description': 'Balanced protection - blocks VPNs, adult content, gambling, and dangerous sites',
+        'description': 'Balanced for the whole family. Blocks adult content and gambling.',
         'icon': 'bi-house-heart',
         'color': '#6366f1',
-        'categories': ['vpn', 'adult', 'gambling', 'malware', 'tracking']
+        'categories': ['adult', 'gambling', 'malware', 'tracking']
     },
     'standard': {
         'name': 'Standard Mode',
-        'description': 'Basic protection - blocks ads, trackers, and dangerous sites only',
+        'description': 'Keeps ads and trackers off your network. Ideal for adults.',
         'icon': 'bi-shield-check',
         'color': '#0ea5e9',
         'categories': ['malware', 'tracking']
@@ -375,6 +380,258 @@ def apply_category(category_id, enable=True):
         return False, "Failed to add any blocklists for this category"
     return True, "Success"
 
+# ============== PER-DEVICE FILTERING (Pi-hole Groups) ==============
+
+# Maps AuraNet mode names to Pi-hole group names
+_AURANET_GROUP_PREFIX = 'AuraNet-'
+
+def _group_name(mode_name):
+    """Pi-hole group name for an AuraNet mode."""
+    return f"{_AURANET_GROUP_PREFIX}{mode_name.capitalize()}"
+
+def ensure_groups():
+    """Create AuraNet groups in Pi-hole's gravity.db if they don't exist."""
+    for mode_id in PROTECTION_MODES:
+        name = _group_name(mode_id)
+        mode = PROTECTION_MODES[mode_id]
+        success, rows = run_sqlite_query(
+            PIHOLE_GRAVITY_DB,
+            "SELECT id FROM \"group\" WHERE name = ?",
+            (name,)
+        )
+        if success and rows:
+            continue
+        run_sqlite_query(
+            PIHOLE_GRAVITY_DB,
+            "INSERT INTO \"group\" (enabled, name, description) VALUES (1, ?, ?)",
+            (name, f"AuraNet {mode['name']}")
+        )
+
+def get_group_id_map():
+    """Return {mode_name: group_id} for all AuraNet groups."""
+    result = {}
+    for mode_id in PROTECTION_MODES:
+        name = _group_name(mode_id)
+        success, rows = run_sqlite_query(
+            PIHOLE_GRAVITY_DB,
+            "SELECT id FROM \"group\" WHERE name = ?",
+            (name,)
+        )
+        if success and rows:
+            result[mode_id] = rows[0][0]
+    return result
+
+def _get_adlist_id(url):
+    """Get the adlist ID for a URL, or None."""
+    success, rows = run_sqlite_query(
+        PIHOLE_GRAVITY_DB,
+        "SELECT id FROM adlist WHERE address = ?",
+        (url,)
+    )
+    if success and rows:
+        return rows[0][0]
+    return None
+
+def _ensure_all_adlists():
+    """Ensure all category adlists exist in the adlist table (enabled)."""
+    for cat_id, cat in CATEGORY_LISTS.items():
+        for url in cat['urls']:
+            add_adlist(url, f"AuraNet: {cat['name']}")
+
+def _get_category_adlist_ids(category_ids):
+    """Get all adlist IDs for a list of category IDs."""
+    ids = []
+    for cat_id in category_ids:
+        if cat_id not in CATEGORY_LISTS:
+            continue
+        for url in CATEGORY_LISTS[cat_id]['urls']:
+            adlist_id = _get_adlist_id(url)
+            if adlist_id is not None:
+                ids.append(adlist_id)
+    return ids
+
+def _get_all_auranet_adlist_ids():
+    """Get all adlist IDs managed by AuraNet (comment starts with 'AuraNet:')."""
+    success, rows = run_sqlite_query(
+        PIHOLE_GRAVITY_DB,
+        "SELECT id FROM adlist WHERE comment LIKE 'AuraNet:%'"
+    )
+    if success and rows:
+        return [r[0] for r in rows]
+    return []
+
+def sync_adlist_groups(network_mode=None):
+    """
+    Sync adlist-group associations in Pi-hole's gravity.db.
+    Ensures all adlists exist, then sets up adlist_by_group for:
+    - Each AuraNet mode group (Kids/Family/Standard)
+    - The default group (0) based on network_mode
+    """
+    if network_mode is None:
+        network_mode = load_settings().get('protection_mode', 'standard')
+
+    # Step 1: Ensure all adlists exist
+    _ensure_all_adlists()
+
+    # Step 2: Ensure groups exist and get their IDs
+    ensure_groups()
+    group_map = get_group_id_map()
+
+    # Step 3: Get all AuraNet adlist IDs
+    all_auranet_ids = set(_get_all_auranet_adlist_ids())
+
+    # Step 4: Set up each mode group
+    for mode_id, mode in PROTECTION_MODES.items():
+        if mode_id not in group_map:
+            continue
+        gid = group_map[mode_id]
+        wanted_ids = set(_get_category_adlist_ids(mode['categories']))
+
+        # Remove unwanted AuraNet adlists from this group
+        for adlist_id in all_auranet_ids:
+            if adlist_id not in wanted_ids:
+                run_sqlite_query(
+                    PIHOLE_GRAVITY_DB,
+                    "DELETE FROM adlist_by_group WHERE adlist_id = ? AND group_id = ?",
+                    (adlist_id, gid)
+                )
+
+        # Add wanted adlists to this group
+        for adlist_id in wanted_ids:
+            # Check if already exists
+            success, rows = run_sqlite_query(
+                PIHOLE_GRAVITY_DB,
+                "SELECT 1 FROM adlist_by_group WHERE adlist_id = ? AND group_id = ?",
+                (adlist_id, gid)
+            )
+            if not (success and rows):
+                run_sqlite_query(
+                    PIHOLE_GRAVITY_DB,
+                    "INSERT OR IGNORE INTO adlist_by_group (adlist_id, group_id) VALUES (?, ?)",
+                    (adlist_id, gid)
+                )
+
+    # Step 5: Set up default group (0) based on network mode
+    if network_mode == 'custom':
+        # Custom mode — use enabled_categories from settings
+        settings = load_settings()
+        default_cats = settings.get('enabled_categories', ['malware', 'tracking'])
+    elif network_mode in PROTECTION_MODES:
+        default_cats = PROTECTION_MODES[network_mode]['categories']
+    else:
+        default_cats = ['malware', 'tracking']
+
+    default_wanted = set(_get_category_adlist_ids(default_cats))
+
+    # Remove unwanted AuraNet adlists from default group
+    for adlist_id in all_auranet_ids:
+        if adlist_id not in default_wanted:
+            run_sqlite_query(
+                PIHOLE_GRAVITY_DB,
+                "DELETE FROM adlist_by_group WHERE adlist_id = ? AND group_id = 0",
+                (adlist_id,)
+            )
+
+    # Add wanted adlists to default group
+    for adlist_id in default_wanted:
+        success, rows = run_sqlite_query(
+            PIHOLE_GRAVITY_DB,
+            "SELECT 1 FROM adlist_by_group WHERE adlist_id = ? AND group_id = 0",
+            (adlist_id,)
+        )
+        if not (success and rows):
+            run_sqlite_query(
+                PIHOLE_GRAVITY_DB,
+                "INSERT OR IGNORE INTO adlist_by_group (adlist_id, group_id) VALUES (?, 0)",
+                (adlist_id,)
+            )
+
+# --- Device mode assignment ---
+
+def set_device_mode(mac, mode_name):
+    """
+    Assign a device to a protection mode via Pi-hole groups.
+    mode_name: 'kids', 'family', 'standard', or None for network default.
+    """
+    group_map = get_group_id_map()
+
+    if mode_name is None or mode_name == 'default':
+        # Remove client from Pi-hole's client table → reverts to default group
+        run_sqlite_query(
+            PIHOLE_GRAVITY_DB,
+            "DELETE FROM client WHERE ip = ?",
+            (mac,)
+        )
+        return True
+
+    if mode_name not in group_map:
+        return False
+
+    gid = group_map[mode_name]
+
+    # Ensure client exists in client table (registered by MAC)
+    success, rows = run_sqlite_query(
+        PIHOLE_GRAVITY_DB,
+        "SELECT id FROM client WHERE ip = ?",
+        (mac,)
+    )
+    if success and rows:
+        client_id = rows[0][0]
+    else:
+        run_sqlite_query(
+            PIHOLE_GRAVITY_DB,
+            "INSERT INTO client (ip, comment) VALUES (?, ?)",
+            (mac, 'Managed by AuraNet')
+        )
+        success, rows = run_sqlite_query(
+            PIHOLE_GRAVITY_DB,
+            "SELECT id FROM client WHERE ip = ?",
+            (mac,)
+        )
+        if not (success and rows):
+            return False
+        client_id = rows[0][0]
+
+    # Clear all existing group assignments for this client
+    run_sqlite_query(
+        PIHOLE_GRAVITY_DB,
+        "DELETE FROM client_by_group WHERE client_id = ?",
+        (client_id,)
+    )
+
+    # Assign to the mode group only (NOT default group 0)
+    run_sqlite_query(
+        PIHOLE_GRAVITY_DB,
+        "INSERT INTO client_by_group (client_id, group_id) VALUES (?, ?)",
+        (client_id, gid)
+    )
+
+    return True
+
+def get_device_modes():
+    """
+    Read Pi-hole client-group assignments and return {mac: mode_name} dict.
+    Only returns devices with AuraNet group assignments.
+    """
+    group_map = get_group_id_map()
+    # Invert: group_id → mode_name
+    gid_to_mode = {gid: mode for mode, gid in group_map.items()}
+
+    result = {}
+    success, rows = run_sqlite_query(
+        PIHOLE_GRAVITY_DB,
+        "SELECT c.ip, cbg.group_id FROM client c "
+        "JOIN client_by_group cbg ON c.id = cbg.client_id "
+        "WHERE c.comment = 'Managed by AuraNet'"
+    )
+    if success and rows:
+        for row in rows:
+            mac = row[0]
+            gid = row[1]
+            if gid in gid_to_mode:
+                result[mac] = gid_to_mode[gid]
+    return result
+
 def get_pihole_status():
     """Check if Pi-hole blocking is currently enabled."""
     try:
@@ -390,6 +647,14 @@ def get_pihole_status():
         return 'not' not in output and 'disabled' not in output
     except Exception:
         return True
+
+def format_stat_short(n):
+    """Format a large number as a short human-readable string: 2600000 → '2.6m', 1234 → '1.2k'"""
+    if n >= 1_000_000:
+        return f"{n/1_000_000:.1f}m"
+    elif n >= 1_000:
+        return f"{n/1_000:.1f}k"
+    return str(n)
 
 def get_stats():
     """Get Pi-hole statistics from FTL database."""
@@ -407,7 +672,7 @@ def get_stats():
             "SELECT COUNT(DISTINCT domain) FROM gravity"
         )
         if success and rows:
-            stats['domains_blocked'] = f"{rows[0][0]:,}"
+            stats['domains_blocked'] = format_stat_short(rows[0][0])
     except Exception:
         pass
 
@@ -427,7 +692,7 @@ def get_stats():
             (today_start,)
         )
         total = rows[0][0] if success and rows else 0
-        stats['queries_today'] = f"{total:,}"
+        stats['queries_today'] = format_stat_short(total)
 
         success, rows = run_sqlite_query(
             PIHOLE_FTL_DB,
@@ -435,7 +700,7 @@ def get_stats():
             (today_start,)
         )
         blocked = rows[0][0] if success and rows else 0
-        stats['blocked_today'] = f"{blocked:,}"
+        stats['blocked_today'] = format_stat_short(blocked)
         stats['percent_blocked'] = round((blocked / total) * 100, 1) if total > 0 else 0
     except Exception as e:
         print(f"Error getting stats: {e}")
@@ -569,7 +834,7 @@ def run_health_check(force=False):
 
     # Blocklist database
     try:
-        success, rows = run_sqlite_query(PIHOLE_GRAVITY_DB, "SELECT COUNT(*) FROM gravity")
+        success, rows = run_sqlite_query(PIHOLE_GRAVITY_DB, "SELECT COUNT(DISTINCT domain) FROM gravity")
         gravity_count = rows[0][0] if success and rows else 0
         gravity_ok = gravity_count > 1000
     except Exception:
@@ -577,9 +842,9 @@ def run_health_check(force=False):
         gravity_count = 0
 
     health['checks']['blocklist_database'] = {
-        'name': 'Blocklist Database',
+        'name': 'Threat Database',
         'status': 'ok' if gravity_ok else 'warning',
-        'message': f'{gravity_count:,} domains in blocklist' if gravity_ok else 'Blocklist may be empty or corrupted'
+        'message': f'Active — blocking {format_stat_short(gravity_count)} known threats' if gravity_ok else 'Threat database needs rebuilding — use Quick Fix below'
     }
 
     # Internet connection
@@ -595,18 +860,33 @@ def run_health_check(force=False):
         'message': 'Connected' if internet_ok else 'No internet connection detected'
     }
 
-    # Blocklist sources (skip local file:// URLs)
-    blocklist_accessible = False
-    for cat in CATEGORY_LISTS.values():
-        http_urls = [u for u in cat['urls'] if not u.startswith('file://')]
-        if http_urls and check_url_accessible(http_urls[0], timeout=5):
-            blocklist_accessible = True
-            break
+    # Blocklist health — check how many enabled lists are actually contributing domains
+    try:
+        success, rows = run_sqlite_query(PIHOLE_GRAVITY_DB,
+            "SELECT COUNT(*) FROM adlist WHERE enabled = 1")
+        total_lists = rows[0][0] if success and rows else 0
+
+        success2, rows2 = run_sqlite_query(PIHOLE_GRAVITY_DB,
+            "SELECT COUNT(*) FROM adlist WHERE enabled = 1 AND number = 0 AND abp_entries = 0")
+        broken_lists = rows2[0][0] if success2 and rows2 else 0
+
+        lists_ok = broken_lists == 0 and total_lists > 0
+    except Exception:
+        total_lists = 0
+        broken_lists = 0
+        lists_ok = False
+
+    if broken_lists > 0:
+        bl_label = f'{broken_lists} of {total_lists} {"list" if broken_lists == 1 else "lists"} contributing no domains — try Rebuild Blocklists'
+    elif total_lists > 0:
+        bl_label = f'All {total_lists} lists healthy'
+    else:
+        bl_label = 'No blocklists found — try Rebuild Blocklists'
 
     health['checks']['blocklist_sources'] = {
-        'name': 'Blocklist Sources',
-        'status': 'ok' if blocklist_accessible else 'warning',
-        'message': 'Sources accessible' if blocklist_accessible else 'Some blocklist sources may be unavailable'
+        'name': 'Blocklist Health',
+        'status': 'ok' if lists_ok else 'warning',
+        'message': bl_label
     }
 
     # Disk space
@@ -726,15 +1006,18 @@ def index():
 def devices():
     settings = load_settings()
     network_devices = get_network_devices()
+    device_modes = get_device_modes()
     for device in network_devices:
         device_settings = settings.get('devices', {}).get(device['mac'], {})
         device['custom_name'] = device_settings.get('name', '')
         device['icon'] = device_settings.get('icon', 'laptop')
+        device['mode'] = device_modes.get(device['mac'])  # None = network default
     return render_template('devices.html',
         title='AuraNet - Device Management',
         is_protected=get_pihole_status(),
         devices=network_devices,
-        settings=settings
+        settings=settings,
+        modes=PROTECTION_MODES,
     )
 
 @app.route('/health')
@@ -772,6 +1055,52 @@ def gravity_dismiss():
         pass
     return jsonify({'ok': True})
 
+@app.route('/device/<mac_address>/settings', methods=['POST'])
+def device_settings(mac_address):
+    """Save device name, icon, and protection mode in one request."""
+    custom_name = request.form.get('custom_name', '').strip()
+    icon = request.form.get('icon', 'laptop')
+    mode = request.form.get('mode', 'default').strip()
+
+    if not custom_name:
+        flash('Please enter a name for the device.', 'warning')
+        return redirect(url_for('devices'))
+
+    settings = load_settings()
+    device_entry = settings.setdefault('devices', {}).setdefault(mac_address, {})
+    old_mode = device_entry.get('mode')
+
+    # Save name and icon
+    device_entry['name'] = custom_name
+    device_entry['icon'] = icon
+
+    # Handle mode change
+    if mode == 'default':
+        mode = None
+    elif mode not in PROTECTION_MODES:
+        flash('Invalid protection mode.', 'danger')
+        return redirect(url_for('devices'))
+
+    device_entry['mode'] = mode
+    save_settings(settings)
+
+    mode_changed = (mode != old_mode)
+    if mode_changed:
+        set_device_mode(mac_address, mode)
+        run_pihole_command(['/usr/local/bin/pihole', 'restartdns', 'reload-lists'], ignore_errors=True)
+
+    # Build flash message
+    if mode_changed and mode:
+        mode_info = PROTECTION_MODES[mode]
+        flash(f'"{custom_name}" saved with {mode_info["name"]}. Changes take effect within a minute.', 'success')
+    elif mode_changed:
+        flash(f'"{custom_name}" saved and set to Network Default.', 'success')
+    else:
+        flash(f'Device saved as "{custom_name}".', 'success')
+
+    return redirect(url_for('devices'))
+
+# Keep old rename route for backwards compatibility (setup wizard uses it)
 @app.route('/device/<mac_address>/rename', methods=['POST'])
 def rename_device(mac_address):
     custom_name = request.form.get('custom_name', '').strip()
@@ -780,7 +1109,9 @@ def rename_device(mac_address):
         flash('Please enter a name for the device.', 'warning')
         return redirect(url_for('devices'))
     settings = load_settings()
-    settings.setdefault('devices', {})[mac_address] = {'name': custom_name, 'icon': icon}
+    device_entry = settings.setdefault('devices', {}).setdefault(mac_address, {})
+    device_entry['name'] = custom_name
+    device_entry['icon'] = icon
     save_settings(settings)
     flash(f'Device renamed to "{custom_name}".', 'success')
     return redirect(url_for('devices'))
@@ -847,15 +1178,12 @@ def set_mode(mode_name):
         return redirect(url_for('index'))
     mode = PROTECTION_MODES[mode_name]
     settings = load_settings()
-    for cat_id in CATEGORY_LISTS:
-        apply_category(cat_id, enable=False)
-    for cat_id in mode['categories']:
-        apply_category(cat_id, enable=True)
     settings['protection_mode'] = mode_name
     settings['enabled_categories'] = mode['categories'].copy()
     save_settings(settings)
+    sync_adlist_groups(mode_name)
     update_gravity_background()
-    flash(f'{mode["name"]} is now active! Blocklists are updating in the background — this takes 2-3 minutes. Your protection remains active throughout.', 'success')
+    flash(f'{mode["name"]} is now the network default! Blocklists are updating in the background — this takes 2-3 minutes. Your protection remains active throughout.', 'success')
     return redirect(url_for('index'))
 
 @app.route('/category/<category_name>/toggle', methods=['POST'])
@@ -867,16 +1195,15 @@ def toggle_category(category_name):
     category = CATEGORY_LISTS[category_name]
     enabled = settings.get('enabled_categories', [])
     if category_name in enabled:
-        apply_category(category_name, enable=False)
         enabled.remove(category_name)
         action = "disabled"
     else:
-        apply_category(category_name, enable=True)
         enabled.append(category_name)
         action = "enabled"
     settings['enabled_categories'] = enabled
     settings['protection_mode'] = 'custom'
     save_settings(settings)
+    sync_adlist_groups('custom')
     update_gravity_background()
     flash(f'{category["name"]} blocking has been {action}. Blocklists are updating in the background — this takes 2-3 minutes.', 'success')
     return redirect(url_for('index'))
@@ -930,13 +1257,10 @@ def setup():
             mode_name = request.form.get('mode')
             if mode_name in PROTECTION_MODES:
                 mode = PROTECTION_MODES[mode_name]
-                for cat_id in CATEGORY_LISTS:
-                    apply_category(cat_id, enable=False)
-                for cat_id in mode['categories']:
-                    apply_category(cat_id, enable=True)
                 settings['protection_mode'] = mode_name
                 settings['enabled_categories'] = mode['categories'].copy()
                 save_settings(settings)
+                sync_adlist_groups(mode_name)
                 update_gravity_background()
             return redirect(url_for('setup', step=6))
 

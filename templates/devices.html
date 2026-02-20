@@ -6,30 +6,38 @@
 {% block extra_styles %}
   .device-card {
     background: #f8fafc;
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 1rem 1.25rem;
-    margin-bottom: 0.75rem;
-    transition: all 0.2s;
+    margin-bottom: 0.625rem;
+    transition: all 0.25s ease;
     border: 2px solid transparent;
   }
 
   .device-card:hover {
-    border-color: #e2e8f0;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    border-color: rgba(99,102,241,0.2);
+    box-shadow: 0 6px 20px rgba(99,102,241,0.1);
+    transform: translateY(-1px);
+    background: white;
   }
 
   .device-icon {
     width: 52px;
     height: 52px;
-    border-radius: 12px;
-    background: white;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    font-size: 1.375rem;
     flex-shrink: 0;
+    color: white;
+    transition: transform 0.25s ease;
   }
+
+  .device-card:hover .device-icon { transform: scale(1.08); }
+
+  .device-icon-high     { background: linear-gradient(135deg, #22c55e, #16a34a); }
+  .device-icon-mid      { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+  .device-icon-low      { background: linear-gradient(135deg, #94a3b8, #64748b); }
 
   .device-name {
     font-weight: 700;
@@ -54,7 +62,56 @@
 
   .device-meta { font-size: 0.8125rem; color: #64748b; margin-top: 0.125rem; }
   .device-meta .separator { margin: 0 0.5rem; color: #cbd5e1; }
-  .device-queries { font-size: 0.75rem; color: #94a3b8; margin-top: 0.375rem; }
+
+  .device-badges {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.35rem;
+    flex-wrap: wrap;
+  }
+
+  .device-activity {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.15rem 0.55rem;
+    border-radius: 20px;
+  }
+  .activity-high   { background: #dcfce7; color: #16a34a; }
+  .activity-mid    { background: #e0e7ff; color: #4338ca; }
+  .activity-low    { background: #f1f5f9; color: #64748b; }
+
+  .mode-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.15rem 0.55rem;
+    border-radius: 20px;
+  }
+  .mode-badge-default  { background: #f1f5f9; color: #64748b; }
+  .mode-badge-kids     { background: #dcfce7; color: #166534; }
+  .mode-badge-family   { background: #ede9fe; color: #5b21b6; }
+  .mode-badge-standard { background: #e0f2fe; color: #075985; }
+
+  .settings-btn {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 8px; border: 2px solid #e2e8f0;
+    background: white; color: #64748b;
+    font-size: 0.8125rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; text-decoration: none;
+    white-space: nowrap;
+  }
+  .settings-btn:hover {
+    border-color: var(--aura-primary);
+    color: var(--aura-primary);
+    background: #eef2ff;
+  }
 
   .info-box {
     background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
@@ -64,15 +121,8 @@
     border-left: 4px solid #3b82f6;
   }
 
-  .info-box.warning {
-    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-    border-left-color: #f59e0b;
-  }
-
   .info-box h4 { font-size: 0.9375rem; font-weight: 700; color: #1e40af; margin-bottom: 0.375rem; display: flex; align-items: center; }
-  .info-box.warning h4 { color: #92400e; }
   .info-box p { font-size: 0.8125rem; color: #1e3a8a; margin: 0; line-height: 1.5; }
-  .info-box.warning p { color: #78350f; }
 
   .empty-state { text-align: center; padding: 3rem 1rem; color: #64748b; }
   .empty-state i { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
@@ -133,6 +183,43 @@
     background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
     color: var(--aura-primary);
   }
+
+  .mode-option {
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .mode-option:hover {
+    border-color: var(--aura-primary);
+    background: #f8fafc;
+  }
+
+  .mode-option.selected {
+    border-color: var(--aura-primary);
+    background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+  }
+
+  .mode-option-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .mode-option-info h5 { font-size: 0.875rem; font-weight: 600; color: #1e293b; margin: 0; }
+  .mode-option-info p { font-size: 0.75rem; color: #64748b; margin: 0; line-height: 1.3; }
 {% endblock %}
 
 {% set active_page = 'devices' %}
@@ -142,7 +229,13 @@
   <div class="info-box">
     <h4><i class="bi bi-info-circle-fill me-2"></i>Your Connected Devices</h4>
     <p>
-      These are all devices that have connected to your network. Click the <i class="bi bi-pencil"></i> icon to give each device a friendly name so you can easily identify them (e.g., "Dad's iPhone", "Living Room TV").
+      Manage your devices below. Click <i class="bi bi-gear"></i> to rename a device or set its protection level.
+      Devices without a specific mode use the network default set on the Home page
+      {% if settings.protection_mode and settings.protection_mode != 'custom' and settings.protection_mode in modes %}
+        (<strong>{{ modes[settings.protection_mode].name }}</strong>).
+      {% else %}
+        (<strong>Custom</strong>).
+      {% endif %}
     </p>
   </div>
 
@@ -158,21 +251,23 @@
 
       {% if devices %}
         {% for device in devices %}
+        {% set activity = 'high' if device.queries > 1000 else 'mid' if device.queries > 100 else 'low' %}
         <div class="device-card">
           <div class="d-flex align-items-center gap-3">
-            <div class="device-icon" style="color: {{ '#22c55e' if device.queries > 1000 else '#6366f1' if device.queries > 100 else '#94a3b8' }};">
+            <div class="device-icon device-icon-{{ activity }}">
               <i class="bi bi-{{ device.icon if device.icon else 'laptop' }}"></i>
             </div>
             <div class="flex-grow-1 min-width-0">
               <div class="device-name">
                 <span class="text-truncate">{{ device.custom_name if device.custom_name else device.name }}</span>
-                <i class="bi bi-pencil edit-btn"
+                <i class="bi bi-gear edit-btn"
                    data-bs-toggle="modal"
-                   data-bs-target="#renameModal"
+                   data-bs-target="#deviceModal"
                    data-mac="{{ device.mac }}"
                    data-name="{{ device.custom_name if device.custom_name else device.name }}"
                    data-icon="{{ device.icon if device.icon else 'laptop' }}"
-                   title="Rename device"></i>
+                   data-mode="{{ device.mode or 'default' }}"
+                   title="Device settings"></i>
               </div>
               <div class="device-meta">
                 <span><i class="bi bi-hdd-network me-1"></i>{{ device.ip }}</span>
@@ -181,17 +276,35 @@
                   <span>{{ device.vendor }}</span>
                 {% endif %}
               </div>
-              <div class="device-queries">
-                <i class="bi bi-activity me-1"></i>{{ "{:,}".format(device.queries) }} queries
+              <div class="device-badges">
+                <div class="device-activity activity-{{ activity }}">
+                  <i class="bi bi-activity"></i>
+                  {{ device.queries|short_num }} queries
+                  {% if activity == 'high' %}&nbsp;· Active
+                  {% elif activity == 'mid' %}&nbsp;· Moderate
+                  {% else %}&nbsp;· Low activity{% endif %}
+                </div>
+                {% if device.mode and device.mode in modes %}
+                  <span class="mode-badge mode-badge-{{ device.mode }}">
+                    <i class="bi {{ modes[device.mode].icon }}"></i>
+                    {{ modes[device.mode].name }}
+                  </span>
+                {% else %}
+                  <span class="mode-badge mode-badge-default">
+                    <i class="bi bi-globe2"></i>
+                    Network Default
+                  </span>
+                {% endif %}
               </div>
             </div>
-            <button class="btn btn-sm btn-outline-primary d-none d-md-inline-flex align-items-center"
+            <button class="settings-btn d-none d-md-inline-flex"
                     data-bs-toggle="modal"
-                    data-bs-target="#renameModal"
+                    data-bs-target="#deviceModal"
                     data-mac="{{ device.mac }}"
                     data-name="{{ device.custom_name if device.custom_name else device.name }}"
-                    data-icon="{{ device.icon if device.icon else 'laptop' }}">
-              <i class="bi bi-pencil me-1"></i>Rename
+                    data-icon="{{ device.icon if device.icon else 'laptop' }}"
+                    data-mode="{{ device.mode or 'default' }}">
+              <i class="bi bi-gear"></i>Settings
             </button>
           </div>
         </div>
@@ -207,35 +320,32 @@
     </div>
   </div>
 
-  <div class="info-box warning">
-    <h4><i class="bi bi-stars me-2"></i>Coming Soon: Per-Device Filtering</h4>
-    <p>
-      In a future update, you'll be able to assign different protection levels to different devices. For example, maximum protection for kids' tablets and standard protection for adult devices. Currently, the protection level set on the Home page applies to all devices.
-    </p>
-  </div>
-
 {% endblock %}
 
 {% block scripts %}
-<!-- RENAME MODAL (outside content div so it's not clipped) -->
-<div class="modal fade" id="renameModal" tabindex="-1" aria-labelledby="renameModalLabel" aria-hidden="true">
+<!-- DEVICE SETTINGS MODAL -->
+<div class="modal fade" id="deviceModal" tabindex="-1" aria-labelledby="deviceModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title fw-bold" id="renameModalLabel">
-          <i class="bi bi-pencil-square me-2 text-primary"></i>Rename Device
+        <h5 class="modal-title fw-bold" id="deviceModalLabel">
+          <i class="bi bi-gear me-2 text-primary"></i>Device Settings
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form method="POST" action="" id="renameForm">
+      <form method="POST" action="" id="deviceForm">
         <div class="modal-body">
           <div class="device-icon-preview" id="iconPreview"><i class="bi bi-laptop"></i></div>
+
+          <!-- Device Name -->
           <div class="mb-3">
             <label for="deviceName" class="form-label">Device Name</label>
             <input type="text" class="form-control" id="deviceName" name="custom_name" placeholder="e.g., Dad's iPhone, Living Room TV" required>
             <div class="form-text">Give this device a name you'll recognise</div>
           </div>
-          <div class="mb-3">
+
+          <!-- Device Icon -->
+          <div class="mb-4">
             <label class="form-label">Device Icon</label>
             <div class="icon-selector">
               {% for icon_name, icon_label in [('phone','Phone'),('tablet','Tablet'),('laptop','Laptop'),('pc-display','Desktop'),('tv','TV'),('speaker','Smart Speaker'),('controller','Game Console'),('smartwatch','Smartwatch'),('printer','Printer'),('router','Router/Network'),('house','Smart Home'),('question-circle','Other')] %}
@@ -246,6 +356,35 @@
             </div>
             <input type="hidden" name="icon" id="selectedIcon" value="laptop">
           </div>
+
+          <!-- Protection Mode -->
+          <div class="mb-2">
+            <label class="form-label">Protection Level</label>
+            <div class="form-text mb-2">Choose a protection level for this device, or use the network default.</div>
+          </div>
+          <div id="modeSelector">
+            <div class="mode-option selected" data-mode="default" onclick="selectMode(this)">
+              <div class="mode-option-icon" style="background: linear-gradient(135deg, #94a3b8, #64748b);">
+                <i class="bi bi-globe2"></i>
+              </div>
+              <div class="mode-option-info">
+                <h5>Network Default</h5>
+                <p>Uses the protection level set on the Home page</p>
+              </div>
+            </div>
+            {% for mode_id, mode in modes.items() %}
+            <div class="mode-option" data-mode="{{ mode_id }}" onclick="selectMode(this)">
+              <div class="mode-option-icon" style="background: linear-gradient(135deg, {{ mode.color }} 0%, {{ mode.color }}cc 100%);">
+                <i class="bi {{ mode.icon }}"></i>
+              </div>
+              <div class="mode-option-info">
+                <h5>{{ mode.name }}</h5>
+                <p>{{ mode.description }}</p>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          <input type="hidden" name="mode" id="selectedMode" value="default">
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-aura btn-aura-outline" data-bs-dismiss="modal">Cancel</button>
@@ -259,19 +398,25 @@
 </div>
 
 <script>
-  document.getElementById('renameModal').addEventListener('show.bs.modal', function (event) {
+  document.getElementById('deviceModal').addEventListener('show.bs.modal', function (event) {
     const button = event.relatedTarget;
     const mac  = button.getAttribute('data-mac');
     const name = button.getAttribute('data-name');
     const icon = button.getAttribute('data-icon') || 'laptop';
+    const mode = button.getAttribute('data-mode') || 'default';
 
-    document.getElementById('renameForm').action = '/device/' + encodeURIComponent(mac) + '/rename';
+    document.getElementById('deviceForm').action = '/device/' + encodeURIComponent(mac) + '/settings';
     document.getElementById('deviceName').value = name;
     document.getElementById('selectedIcon').value = icon;
+    document.getElementById('selectedMode').value = mode;
     document.getElementById('iconPreview').innerHTML = '<i class="bi bi-' + icon + '"></i>';
 
     document.querySelectorAll('.icon-option').forEach(opt => {
       opt.classList.toggle('selected', opt.getAttribute('data-icon') === icon);
+    });
+
+    document.querySelectorAll('.mode-option').forEach(opt => {
+      opt.classList.toggle('selected', opt.getAttribute('data-mode') === mode);
     });
   });
 
@@ -284,5 +429,11 @@
       document.getElementById('iconPreview').innerHTML = '<i class="bi bi-' + icon + '"></i>';
     });
   });
+
+  function selectMode(el) {
+    document.querySelectorAll('.mode-option').forEach(opt => opt.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('selectedMode').value = el.getAttribute('data-mode');
+  }
 </script>
 {% endblock %}

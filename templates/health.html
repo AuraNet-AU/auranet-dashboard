@@ -86,6 +86,44 @@
   }
 
   .btn-repair:hover { color: white; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
+
+  .quick-fix-card {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.875rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    background: white;
+    text-decoration: none;
+    transition: all 0.22s ease;
+    color: #1e293b;
+    height: 100%;
+  }
+
+  .quick-fix-card:hover {
+    border-color: var(--aura-primary);
+    background: #eef2ff;
+    color: #1e293b;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.14);
+  }
+
+  .quick-fix-icon {
+    width: 42px; height: 42px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+    color: var(--aura-primary);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.125rem;
+    flex-shrink: 0;
+    transition: transform 0.22s ease;
+  }
+
+  .quick-fix-card:hover .quick-fix-icon { transform: scale(1.1); }
+
+  .quick-fix-name { font-weight: 600; font-size: 0.9375rem; color: #1e293b; }
+  .quick-fix-desc { font-size: 0.75rem; color: #64748b; margin-top: 0.15rem; line-height: 1.4; }
 {% endblock %}
 
 {% set active_page = 'health' %}
@@ -167,17 +205,35 @@
       <h2>Quick Fixes</h2>
     </div>
     <div class="aura-card-body">
-      <p class="text-muted mb-3" style="font-size: 0.875rem;">Try these if you're experiencing issues:</p>
-      <div class="d-flex flex-wrap gap-2">
-        <a href="{{ url_for('repair_issue', issue='dns_resolution') }}" class="btn btn-outline-primary">
-          <i class="bi bi-arrow-clockwise me-1"></i>Restart DNS
-        </a>
-        <a href="{{ url_for('repair_issue', issue='blocklist_database') }}" class="btn btn-outline-primary">
-          <i class="bi bi-database me-1"></i>Rebuild Blocklists
-        </a>
-        <a href="{{ url_for('repair_issue', issue='pihole_service') }}" class="btn btn-outline-primary">
-          <i class="bi bi-power me-1"></i>Restart Protection
-        </a>
+      <p class="text-muted mb-3" style="font-size: 0.875rem;">Click a fix to automatically resolve common issues.</p>
+      <div class="row g-2">
+        <div class="col-12 col-md-4">
+          <a href="{{ url_for('repair_issue', issue='dns_resolution') }}" class="quick-fix-card">
+            <div class="quick-fix-icon"><i class="bi bi-arrow-clockwise"></i></div>
+            <div>
+              <div class="quick-fix-name">Restart DNS</div>
+              <div class="quick-fix-desc">Fixes internet lookups failing — use when websites stop loading</div>
+            </div>
+          </a>
+        </div>
+        <div class="col-12 col-md-4">
+          <a href="{{ url_for('repair_issue', issue='blocklist_database') }}" class="quick-fix-card">
+            <div class="quick-fix-icon"><i class="bi bi-database"></i></div>
+            <div>
+              <div class="quick-fix-name">Rebuild Blocklists</div>
+              <div class="quick-fix-desc">Fixes an empty or outdated threat database — also refreshes all protection lists</div>
+            </div>
+          </a>
+        </div>
+        <div class="col-12 col-md-4">
+          <a href="{{ url_for('repair_issue', issue='pihole_service') }}" class="quick-fix-card">
+            <div class="quick-fix-icon"><i class="bi bi-power"></i></div>
+            <div>
+              <div class="quick-fix-name">Restart Protection</div>
+              <div class="quick-fix-desc">Fixes protection errors — use when the Protection Service check shows an error</div>
+            </div>
+          </a>
+        </div>
       </div>
     </div>
   </div>

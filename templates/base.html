@@ -26,35 +26,70 @@
 
       /* ---- Header ---- */
       .main-header {
-        background: linear-gradient(135deg, var(--aura-primary) 0%, var(--aura-primary-dark) 100%);
+        background: linear-gradient(135deg, #1e1b4b 0%, #4c1d95 40%, #6d28d9 70%, #7c3aed 100%);
         color: white;
         padding: 1.25rem 0;
         margin-bottom: 1.5rem;
-        box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+        box-shadow: 0 4px 24px rgba(109, 40, 217, 0.45);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .main-header::before {
+        content: '';
+        position: absolute;
+        top: -60%;
+        right: -10%;
+        width: 55%;
+        height: 220%;
+        background: radial-gradient(ellipse, rgba(167, 139, 250, 0.18) 0%, transparent 70%);
+        pointer-events: none;
+      }
+
+      .main-header::after {
+        content: '';
+        position: absolute;
+        bottom: -80%;
+        left: 5%;
+        width: 40%;
+        height: 200%;
+        background: radial-gradient(ellipse, rgba(196, 181, 253, 0.1) 0%, transparent 65%);
+        pointer-events: none;
       }
 
       .logo-icon {
         width: 50px;
         height: 50px;
-        background: rgba(255,255,255,0.2);
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.25);
         border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 1.5rem;
+        backdrop-filter: blur(4px);
       }
 
       .nav-link-custom {
-        color: rgba(255,255,255,0.8);
+        color: rgba(255,255,255,0.75);
         text-decoration: none;
-        padding: 0.5rem 1rem;
+        padding: 0.45rem 0.9rem;
         border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 500;
         transition: all 0.2s;
+        position: relative;
       }
 
-      .nav-link-custom:hover, .nav-link-custom.active {
+      .nav-link-custom:hover {
         color: white;
-        background: rgba(255,255,255,0.15);
+        background: rgba(255,255,255,0.12);
+      }
+
+      .nav-link-custom.active {
+        color: white;
+        background: rgba(255,255,255,0.18);
+        box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset;
       }
 
       /* ---- Status pill ---- */
